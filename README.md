@@ -2,7 +2,7 @@
 Read CLI arguments into your C application
 
 ## Sample
-This can be found in cliargs_test.c
+This can be found in [cliargs_test.c](https://github.com/donjajo/cliargs/blob/master/tests/cliargs_test.c)
 ```sh
 gcc tests/cliargs_test.c -Wall -o test
 ```
