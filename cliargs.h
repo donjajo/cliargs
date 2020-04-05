@@ -25,8 +25,9 @@ typedef int format_t;
 /**
  * Checks and get value of an argument, if it was provided in the command line. 
  * 
- * @param   Arg     *formats    All arguments formats provided in LoadArgs()
- * @param   arg_v   *values     Values provided in checkArgs()
+ * @param   Arg     *formats    All arguments formats
+ * @param   size_t  len         Count of *formats
+ * @param   arg_v   *values     Values provided in loadArgs()
  * @param   char    shortName   Short name of the argument to get
  * @param   char    *v          char pointer to copy argument value to. This is only copied when format.hasValue is true
  * 
@@ -37,8 +38,8 @@ int getArg( Arg *args, size_t len, arg_v values, char shortName, char *buf ) {
     for( int i = 0; i < len; i++ ) {
         Arg arg = args[i];
         
-        if( arg.shortName == shortName ) {
-            if( arg.hasValue ) {
+        if( arg.shortName == shortName ) { // Currently supports getting for shortName
+            if( arg.hasValue ) { // Has value and is not empty
                 if( strcmp( "", (char*)values[i] ) ) {
                     strcpy(buf, (char*)values[i]);
                     return 1;
@@ -95,15 +96,24 @@ int isLastShort( char const *arg, int pos ) {
     return ( pos+1 > len );
 }
 
+/**
+ * Checks if an argv element is supposed to have a value
+ * 
+ * @param   const char*     argv    An element of **argv
+ * @param   Arg*            formats List of formats
+ * 
+ * @return  int             0|1
+*/
 int hasValue( const char *argv, Arg *formats ) {
-    for(int i=0;&formats[i];i++) {
+    // While format is not null
+    for(int i=0;formats[i].shortName;i++) {
         Arg format = formats[i];
         
-        if( !format.hasValue )
+        if( !format.hasValue ) // Has value, no point, continue
             continue;
 
         if( isLong(argv) ) {
-            char *buf = ltrim(argv, '-');
+            char *buf = ltrim(argv, '-'); // trim of left character to compare with the longName
             if( strcmp(buf, format.longName ) == 0 ) {
                 return 1;
             }
@@ -125,8 +135,9 @@ int hasValue( const char *argv, Arg *formats ) {
 /**
  * Get list of positional arguments. Always free return value if not NULL!
  * 
- * @param   int     argc    Argument count
- * @param   char    **argv  Argument values
+ * @param   int     argc        Argument count
+ * @param   char    **argv      Argument values
+ * @param   Arg     *formats    List of argument formats. This is to check for .hasValue property
  * 
  * @return  char**|NULL  List of positional arguments.NULL on none
 */
@@ -155,6 +166,13 @@ char **getPosArgs( int argc, char **argv, Arg *formats ) {
     return NULL;
 }
 
+/**
+ * Shows the help menu for CLI
+ * 
+ * @param   Arg*    args            List of argument formats
+ * @param   size_t  arg_len         Lenth of *args
+ * @param   char*   description     Description of help page
+*/
 void showHelp( Arg *args, size_t arg_len, const char *description ) {
     printf( "%s\n", description);
     for(int i=0;i<arg_len;i++) {
@@ -177,6 +195,7 @@ void showHelp( Arg *args, size_t arg_len, const char *description ) {
 
     exit(1);
 }
+
 /**
  * Checks loaded arguments to flag off missing required ones and allocate values
  * 
@@ -184,7 +203,7 @@ void showHelp( Arg *args, size_t arg_len, const char *description ) {
  * @param char  **argv  Pointer to argument values
  * 
 */ 
-void checkArgs( Arg *formats, size_t formatCount, int argc, char **argv, arg_v values ) {
+void loadArgs( Arg *formats, size_t formatCount, int argc, char **argv, arg_v values ) {
     int missingRequired[formatCount]; // allocate array to put missing required ones
     int missingCount=-1; // count missing ones
     

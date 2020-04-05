@@ -28,8 +28,9 @@ int main( int argc, char **argv ) {
         exit(0);
     }
 
-    checkArgs( args, ARG_COUNT, argc, argv, values );
+    loadArgs( args, ARG_COUNT, argc, argv, values );
     
+    // Show help 
     // if( getArg(args, ARG_COUNT, values, 'h', NULL ) ) {
     //     showHelp(args, ARG_COUNT, "This is a test program" );
     // }
@@ -49,6 +50,16 @@ int main( int argc, char **argv ) {
             printf( "%s", getArg( args, ARG_COUNT, values, args[i].shortName, NULL ) ? "TRUE" : "FALSE" ); 
         }
         printf( "\n" );
+    }
+
+    printf( "\nPOSITIONAL ARGUMENTS\n========\n" );
+    char **posArgs = getPosArgs(argc,argv,args);
+
+    if( posArgs != NULL ) {
+        for( int i = 0; posArgs[i]; i++ ) {
+            printf( "%s\n", posArgs[i] );
+        }
+        free(posArgs);
     }
 
     free(values);
